@@ -43,7 +43,7 @@ const removeContact = async (req, res, next) => {
   const { contactId } = req.params;
   try {
     await deleteContact(contactId);
-    res.status(200).send({ message: "Task deleted" });
+    res.status(200).send({ message: "Contact deleted" });
   } catch (error) {
     next(error);
   }
