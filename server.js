@@ -18,7 +18,7 @@ const startServer = async () => {
     app.listen(3000, () => {
       console.log("Server running. Use our API on port: 3000");
     });
-    console.log("Database connection successful!");
+    console.log("DB connected");
   } catch (err) {
     console.log(err);
     process.exit(1);
