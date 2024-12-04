@@ -8,7 +8,7 @@ const router = express.Router();
 
 const schema = Joi.object({
   email: Joi.string()
-    .email({ tlds: { allow: ["com", "org", "net"] } })
+    .email({ tlds: { allow: ["pl", "com", "org", "net"] } })
     .required(),
   password: Joi.string()
     .min(8)
