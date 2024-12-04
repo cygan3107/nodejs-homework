@@ -37,6 +37,5 @@ userSchema.methods.validatePassword = function (password) {
 };
 
 const User = mongoose.model("user", userSchema, "user");
-// users ostatnie ?
 
 module.exports = User;
