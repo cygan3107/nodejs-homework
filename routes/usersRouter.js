@@ -3,6 +3,9 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const Joi = require("joi");
 const authMiddleware = require("../JWT/middlewareJWT");
+const gravatar = require("gravatar");
+const { updateAvatar } = require("../controllers/avatars");
+const { uploadMiddleware } = require("../Multer/configMulter");
 
 const router = express.Router();
 
@@ -17,8 +20,6 @@ const schema = Joi.object({
     .required(),
 });
 
-//
-
 router.post("/signup", async (req, res, next) => {
   const { error, value } = schema.validate(req.body);
   if (error) {
@@ -30,24 +31,26 @@ router.post("/signup", async (req, res, next) => {
   const user = await User.findOne({ email: value.email });
 
   if (user) {
-    return res.status(409).json({ message: "This email is already taken" });
+    return res.status(409).json({ message: "Email in use" });
   }
   try {
-    const newUser = new User({ email: value.email });
+    const newUser = new User({
+      email: value.email,
+      avatarURL: gravatar.url(value.email, { s: "200", r: "pg", d: "retro" }),
+    });
     await newUser.setPassword(value.password);
     await newUser.save();
     return res.status(201).json({
       user: {
         email: newUser.email,
         subscription: newUser.subscription,
+        avatarURL: newUser.avatarURL,
       },
     });
   } catch (error) {
     next(error);
   }
 });
-
-//
 
 router.post("/login", async (req, res, next) => {
   const { error, value } = schema.validate(req.body);
@@ -72,7 +75,6 @@ router.post("/login", async (req, res, next) => {
     };
     const token = jwt.sign(payload, process.env.SECRET, { expiresIn: "12h" });
     user.token = token;
-    console.log(token);
     await user.save();
     return res.status(200).json({
       token: user.token,
@@ -86,8 +88,6 @@ router.post("/login", async (req, res, next) => {
   }
 });
 
-//
-
 router.post("/logout", authMiddleware, async (req, res, next) => {
   const userData = res.locals.user;
   const user = await User.findOne({ _id: userData.id });
@@ -99,9 +99,6 @@ router.post("/logout", authMiddleware, async (req, res, next) => {
     return res.status(204).send();
   }
 });
-
-//
-
 router.get("/current", authMiddleware, async (req, res, next) => {
   const userData = res.locals.user;
   const user = await User.findOne({ _id: userData.id });
@@ -115,5 +112,12 @@ router.get("/current", authMiddleware, async (req, res, next) => {
     });
   }
 });
+
+router.patch(
+  "/avatars",
+  authMiddleware,
+  uploadMiddleware.single("avatar"),
+  updateAvatar
+);
 
 module.exports = router;
