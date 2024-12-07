@@ -3,7 +3,7 @@ const Jimp = require("jimp");
 const isImageAndTransform = async (inputPath, outputPath) => {
   try {
     const image = await Jimp.read(inputPath);
-    image.resize(250, 250);
+    image.resize(256, 256);
     await image.writeAsync(outputPath);
 
     return true;
